@@ -12,7 +12,7 @@ chmod +x ./logparser
 
 Run with:
 ```
-logparser
+logparser [series-name] [input-file]
 ```
 
 ## usage 
