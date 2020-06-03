@@ -21,10 +21,10 @@ usage: logparser [-h] [-o OUTPUT] series in
 A command line tool for parsing comma separated log into a SiriDB understandable CV file
 
 positional arguments:
-  series                The name of the series. This is used in each line of the result as "SERIES,col-name,time,value"
-  in                    The input file
+  * series                The name of the series. This is used in each line of the result as "SERIES,col-name,time,value"
+  * in                    The input file
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -o OUTPUT, --output OUTPUT
+  * -h, --help            show this help message and exit
+  * -o OUTPUT, --output OUTPUT  
                         Optionally specify output file name, default=[input file name].csv
