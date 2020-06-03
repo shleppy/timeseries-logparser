@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""
+Parsing tool to convert improperly formatted logs into csv files that can be
+inserted into SiriDB.
+
+Converts for each col in 0..n with rows 0..m to
+col(1..n)-series,time,val
+..
+m
+
+Author: Shelby Hendrickx
+"""
+import sys
+import argparse
+import csv
+import datetime
+from datetime import timezone
+from pathlib import Path
+from os import path
+
+# initialize ArgumentParser
+parser = argparse.ArgumentParser(description='A command line tool for parsing \
+        comma separated log into a SiriDB understandable CV file')
+parser.add_argument('series',
+                    type=str,
+                    help='The name of the series. This is used in each line of\
+                            the result as "SERIES,col-name,time,value"')
+parser.add_argument('input',
+                    metavar='in',
+                    type=str,
+                    help='The input file')
+parser.add_argument('-o',
+                    '--output',
+                    action='store',
+                    help='Optionally specify output file name, \
+                            default=[input file name].csv')
+
+# Process arguments
+args = parser.parse_args()
+
+
+def get_out_file_name(file_name):
+    """Returns the corresponding csv file name of a file"""
+    base_name = Path(file_name).stem
+    return base_name + '.csv'
+
+
+# Get file names
+series = args.series
+input_file_name = args.input
+output_file_name = args.output \
+    if args.output is not None else get_out_file_name(input_file_name)
+
+# Check if input file exists
+if not path.exists(input_file_name):
+    print('File: {0} not found.'.format(input_file_name))
+    print('Exiting...')
+    sys.exit()
+
+
+def get_formatted_line(series_name, col, time, val):
+    """Creates an insertion line"""
+    return col + '-' + series_name + ',' + time + ',' + val
+
+
+def get_timestamp(date):
+    """Returns epoch in ms from a data"""
+    formatted_date = datetime.datetime.strptime(date, '%Y%m%d %H:%M:%S.%f')
+    return formatted_date.replace(tzinfo=timezone.utc).timestamp() * 1000
+
+
+def parse_file(in_file, out_file):
+    """Creates a csv file which can be inserted into SiriDB"""
+    print('Writing output to file: {0}'.format(out_file))
+
+    with open(in_file, 'r') as f_in, open(out_file, 'w') as f_out:
+        reader = csv.DictReader(f_in)
+        writer = csv.writer(f_out)
+
+        col_titles = reader.fieldnames[1:]
+        data = list(reader)
+
+        for col in col_titles:
+            for row in data:
+                timestamp = get_timestamp(row['Date Time'])
+                writer.writerow([
+                    get_formatted_line(series, col, str(timestamp), row[col])
+                ])
+
+
+parse_file(input_file_name, output_file_name)
