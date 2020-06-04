@@ -1,12 +1,20 @@
 #!/usr/bin/env python3
 """
-Parsing tool to convert improperly formatted logs into csv files that can be
-inserted into SiriDB.
+Tool for parsing csv files into a format that siriDB recognizes.
 
-Converts for each col in 0..n with rows 0..m to
-col(1..n)-series,time,val
-..
-m
+e.g.
+
+date, col1, col2, col3, col4
+ts, val1a, val2a, val3a, val4a
+ts, val1b, val2b, val3b, val4b
+
+becomes:
+
+seriesname-col1, ts, val1a
+seriesname-col1, ts, val1b
+seriesname-col2, ts, val2a
+seriesname-col2, ts, val2b
+etc..
 
 Author: Shelby Hendrickx
 """
@@ -66,7 +74,7 @@ def get_formatted_line(series_name, col, time, val):
 def get_timestamp(date):
     """Returns epoch in ms from a data"""
     formatted_date = datetime.datetime.strptime(date, '%Y%m%d %H:%M:%S.%f')
-    return formatted_date.replace(tzinfo=timezone.utc).timestamp() * 1000
+    return datetime.datetime.timestamp(formatted_date) * 1000
 
 
 def parse_file(in_file, out_file):
