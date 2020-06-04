@@ -60,7 +60,7 @@ if not path.exists(input_file_name):
 
 def get_formatted_line(series_name, col, time, val):
     """Creates an insertion line"""
-    return col + '-' + series_name + ',' + time + ',' + val
+    return [series_name + '-' + col, time, val]
 
 
 def get_timestamp(date):
@@ -83,9 +83,12 @@ def parse_file(in_file, out_file):
         for col in col_titles:
             for row in data:
                 timestamp = get_timestamp(row['Date Time'])
-                writer.writerow([
-                    get_formatted_line(series, col, str(timestamp), row[col])
-                ])
+                writer.writerow(
+                    get_formatted_line(series,
+                                       col[1:],
+                                       str(timestamp)[0:-2],
+                                       row[col])
+                )
 
 
 parse_file(input_file_name, output_file_name)
